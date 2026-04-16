@@ -82,6 +82,12 @@ The goal is to make debugging faster and easier, especially for repetitive issue
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Team
+
+**Team Name:** 404 ERROR  
+
+**Members:**
+- Gagan M  
+- Abhishek M  
 
 Built as part of Hack2Hire 1.0
