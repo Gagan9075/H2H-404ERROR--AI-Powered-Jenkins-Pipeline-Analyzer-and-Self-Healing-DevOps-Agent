@@ -1,0 +1,9 @@
+Started by user Gagan M
+Running as SYSTEM
+Building in workspace /var/jenkins_home/workspace/test-pipeline
+[test-pipeline] $ /bin/sh -xe /tmp/jenkins10089874879730507665.sh
++ echo Hello Jenkins
+Hello Jenkins
++ exit 1
+Build step 'Execute shell' marked build as failure
+Finished: FAILURE
