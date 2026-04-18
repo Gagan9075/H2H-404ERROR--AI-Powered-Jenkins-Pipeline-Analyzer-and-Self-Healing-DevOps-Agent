@@ -1,8 +1,8 @@
-# 🤖 AutoFix CI — AI-Powered Jenkins Failure Analyzer
+# 🚀 AutoFix CI — Self-Healing DevOps AI
 
-### 🚧 Hack2Hire Project | Self-Healing DevOps Assistant
+### 🚧 Hack2Hire Project | Intelligent CI/CD Failure Analyzer
 
-> 💡 Transform Jenkins failures into clear explanations and actionable fixes using AI
+> 💡 Transform Jenkins failures into actionable insights using AI + rule-based intelligence
 
 ---
 
@@ -13,6 +13,7 @@
 * [Solution](#-solution)
 * [System Architecture](#-system-architecture)
 * [Pipeline Flow](#-pipeline-flow)
+* [Decision Engine Flow](#-decision-engine-flow-new)
 * [Key Features](#-key-features)
 * [Tech Stack](#️-tech-stack)
 * [Project Structure](#-project-structure)
@@ -25,49 +26,53 @@
 
 ## 📌 Overview
 
-AutoFix CI is an AI-powered DevOps assistant that analyzes Jenkins build failures and provides:
+AutoFix CI is an **AI-powered DevOps assistant** that analyzes Jenkins pipeline failures and provides:
 
 * ❌ Error identification
-* 🧠 Root cause explanation
-* 🛠️ Suggested fixes
-
-It simplifies debugging by converting complex logs into understandable insights.
+* 🧠 Root cause analysis
+* 🛠 Actionable fixes
+* 🔁 Learning from past failures
 
 ---
 
 ## 🚀 Why This Project?
 
-Debugging CI/CD pipelines is often:
+Debugging CI/CD pipelines is:
 
-* Time-consuming
-* Hard to understand
-* Repetitive
+* ⏳ Time-consuming
+* 🧩 Hard to interpret
+* 🔁 Repetitive
 
-Developers spend too much time reading logs instead of fixing issues.
+Developers waste time reading logs instead of fixing problems.
 
 ---
 
 ## 💡 Solution
 
-This system:
+AutoFix CI introduces a **multi-layer intelligent system**:
 
-1. Reads Jenkins logs
-2. Applies rule-based detection
-3. Uses AI (LLaMA3 via Ollama)
-4. Generates human-readable explanations
-5. Stores insights for future use
+1. 🧹 Cleans noisy logs
+2. 🧠 Checks past failures (memory system)
+3. ⚙️ Applies rule-based detection
+4. 🤖 Uses AI for deep reasoning
+5. 🛠 Generates fixes
+6. 📊 Calculates confidence & severity
 
 ---
 
 ## 🧠 System Architecture
 
 ```mermaid
-flowchart LR
-    A[Jenkins Job] --> B[Generate Logs]
-    B --> C[Rule-Based Analyzer]
-    C --> D[AI Analyzer (LLaMA3)]
-    D --> E[Explanation + Fix]
-    E --> F[Memory Storage]
+flowchart TD
+    A[User Input: Jenkins Logs] --> B[Log Preprocessing]
+    B --> C[Memory Engine]
+    C --> D[Rule-Based Engine]
+    D --> E[AI Analyzer - LLaMA3]
+    E --> F[Fix Generator]
+    F --> G[Confidence Engine]
+    G --> H[Severity Detector]
+    H --> I[Final Output]
+    I --> J[Memory Update]
 ```
 
 ---
@@ -77,51 +82,103 @@ flowchart LR
 ```mermaid
 sequenceDiagram
     participant User
-    participant Jenkins
+    participant UI
     participant Analyzer
     participant AI
+    participant Memory
 
-    User->>Jenkins: Run Job
-    Jenkins-->>Analyzer: Send Logs
-    Analyzer->>Analyzer: Rule Check
-    Analyzer->>AI: Send Logs
-    AI-->>Analyzer: Analysis
-    Analyzer-->>User: Explanation + Fix
+    User->>UI: Paste Jenkins Log
+    UI->>Analyzer: Send Log
+    Analyzer->>Memory: Check Known Issue
+    Memory-->>Analyzer: Match / No Match
+    Analyzer->>Analyzer: Rule-Based Check
+    Analyzer->>AI: Send Processed Log
+    AI-->>Analyzer: Root Cause + Fix
+    Analyzer-->>UI: Display Results
+    Analyzer->>Memory: Store Learning
+```
+
+---
+
+## 🧠 Decision Engine Flow (NEW)
+
+```mermaid
+flowchart LR
+    A[Incoming Log] --> B{Memory Match?}
+    B -->|Yes| C[Return Stored Solution]
+    B -->|No| D{Rule Match?}
+    D -->|Yes| E[Apply Rule Fix]
+    D -->|No| F[Send to AI]
+    F --> G[Generate Fix]
+    G --> H[Store in Memory]
 ```
 
 ---
 
 ## 🌟 Key Features
 
-### 🧩 Smart Analysis
+### 🧹 Log Preprocessing (NEW 🔥)
 
-* Detects common Jenkins failures
-* Identifies patterns like `exit 1`, command errors
+* Filters only important error lines
+* Improves AI accuracy
 
-### 🤖 AI-Powered Insights
+---
 
-* Uses LLaMA3 locally via Ollama
-* Converts logs into simple explanations
+### 🧠 Memory Learning System
 
-### 🧠 Memory System
+* Stores failures in `memory.json`
+* Learns over time
+* Reduces repeated debugging
 
-* Stores past failures in `memory.json`
-* Helps improve future debugging
+---
 
-### ⚡ Fast Debugging
+### ⚙️ Rule-Based Engine
 
-* Saves developer time
-* Reduces manual effort
+* Detects common failures instantly
+* Example:
+
+  * `exit 1`
+  * `cannot run program`
+
+---
+
+### 🤖 AI-Powered Analysis
+
+* Uses LLaMA3 via Ollama
+* Provides human-readable explanations
+
+---
+
+### 🛠 Auto Fix Engine
+
+* Suggests fixes
+* Provides corrected commands
+
+---
+
+### 📊 Confidence Scoring
+
+* Shows reliability of detection
+
+---
+
+### 🚨 Severity Detection (NEW 🔥)
+
+* HIGH → Critical failure
+* MEDIUM → Warning
+* LOW → Minor issue
 
 ---
 
 ## 🛠️ Tech Stack
 
-* **Jenkins** → CI/CD automation
-* **Docker** → Containerization
-* **Python** → Core logic
-* **Ollama (LLaMA3)** → AI model
-* **Streamlit** → UI
+| Layer    | Technology      |
+| -------- | --------------- |
+| Backend  | Python          |
+| UI       | Streamlit       |
+| AI Model | LLaMA3 (Ollama) |
+| API      | Requests        |
+| Storage  | JSON            |
 
 ---
 
@@ -129,14 +186,14 @@ sequenceDiagram
 
 ```
 Hack2Hire/
- ├── app.py                # Streamlit UI
- ├── final_analyzer.py     # Main analyzer logic
- ├── logs.txt              # Jenkins logs input
- ├── memory.json           # Stores past analysis
- ├── requirements.txt      # Dependencies
- ├── .gitignore            # Ignored files
- ├── README.md             # Documentation
- ├── LICENSE               # License file
+ ├── app.py
+ ├── final_analyzer.py
+ ├── logs.txt
+ ├── memory.json
+ ├── requirements.txt
+ ├── .gitignore
+ ├── README.md
+ ├── LICENSE
 ```
 
 ---
@@ -149,40 +206,47 @@ Hack2Hire/
 pip install -r requirements.txt
 ```
 
-### 2️⃣ Run analyzer
+### 2️⃣ Start AI Model
 
 ```
-python final_analyzer.py
+ollama run llama3
 ```
 
-### 3️⃣ Run UI (optional)
+### 3️⃣ Run UI
 
 ```
-python -m streamlit run app.py
+streamlit run app.py
 ```
 
 ---
 
 ## 🧪 Example Output
 
-```
-Error Type: Build Failure
+### Input Log
 
-Reason:
-Script exited with non-zero status
-
-Fix:
-Remove 'exit 1' or correct script logic
 ```
++ echo Hello Jenkins
++ exit 1
+Build step 'Execute shell' marked build as failure
+```
+
+### Output
+
+* ❌ Error: Script Failure
+* 📌 Reason: Script exited with non-zero status
+* 🛠 Fix: Remove `exit 1`
+* 📊 Confidence: 95%
+* 🚨 Severity: HIGH
 
 ---
 
 ## 🔮 Future Scope
 
-* 🔧 Auto-fix Jenkins jobs
-* 📩 Slack / Email integration
-* 🌐 Support for GitHub Actions & GitLab CI
 * 📊 Analytics dashboard
+* 🔁 Auto pipeline healing
+* ☁️ Cloud deployment
+* 🔗 GitHub Actions integration
+* 🤖 Multi-agent AI system
 
 ---
 
@@ -197,6 +261,10 @@ Remove 'exit 1' or correct script logic
 
 ## 📌 Conclusion
 
-AutoFix CI enhances DevOps workflows by combining rule-based detection with AI-powered reasoning, making CI/CD debugging faster, smarter, and more efficient.
+AutoFix CI transforms DevOps debugging by combining:
 
----
+* Rule-based intelligence
+* AI reasoning
+* Memory-based learning
+
+➡️ Making CI/CD pipelines smarter, faster, and self-healing 🚀
