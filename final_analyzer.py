@@ -1,37 +1,10 @@
 import requests
 import json
-import re
+from collections import defaultdict
 
 MEMORY_FILE = "memory.json"
 
-# ---------------- LOG PREPROCESSING (NEW 🔥) ----------------
-
-def clean_log(log_text):
-    """Remove noise and keep important lines"""
-    lines = log_text.split("\n")
-    important = []
-
-    for line in lines:
-        if any(keyword in line.lower() for keyword in [
-            "error", "fail", "exception", "exit", "cannot"
-        ]):
-            important.append(line)
-
-    return "\n".join(important) if important else log_text
-
-
-def extract_error_keyword(log_text):
-    """Extract main error keyword for memory matching"""
-    patterns = ["exit 1", "cannot run program", "failure", "exception"]
-
-    for p in patterns:
-        if p in log_text.lower():
-            return p
-
-    return "unknown"
-
-
-# ---------------- MEMORY SYSTEM ----------------
+# ---------------- MEMORY ----------------
 
 def load_memory():
     try:
@@ -48,16 +21,18 @@ def save_memory(memory):
 
 def check_memory(log_text):
     memory = load_memory()
-    keyword = extract_error_keyword(log_text)
 
     for item in memory["failures"]:
-        if item["error"] == keyword:
+        if item["error"].lower() in log_text.lower():
             return item
 
     return None
 
 
 def update_memory(error, solution):
+    if not error:
+        return
+
     memory = load_memory()
 
     for item in memory["failures"]:
@@ -75,91 +50,36 @@ def update_memory(error, solution):
     save_memory(memory)
 
 
-# ---------------- RULE-BASED ANALYZER ----------------
+# ---------------- NORMALIZER (NEW 🔥) ----------------
+
+def normalize_log(log_text):
+    return log_text.lower().strip()
+
+
+# ---------------- RULE ENGINE ----------------
 
 def rule_based_analysis(log_text):
-    log = log_text.lower()
+    log = normalize_log(log_text)
 
-    if "cannot run program" in log:
-        return {
-            "error": "Environment Error",
-            "reason": "Wrong OS command (Windows vs Linux)"
-        }
+    patterns = [
+        ("permission denied", "Permission Denied", "Execution permission missing"),
+        ("not found", "Command Not Found", "Missing dependency or wrong path"),
+        ("connection refused", "Connection Refused", "Service unavailable"),
+        ("exit 1", "Script Failure", "Non-zero exit status"),
+        ("no such file", "File Error", "File missing or wrong path")
+    ]
 
-    elif "exit 1" in log:
-        return {
-            "error": "Script Failure",
-            "reason": "Script exited with non-zero status"
-        }
-
-    elif "marked build as failure" in log:
-        return {
-            "error": "Build Failure",
-            "reason": "Pipeline step failed"
-        }
+    for keyword, error, reason in patterns:
+        if keyword in log:
+            return {"error": error, "reason": reason}
 
     return None
 
 
-# ---------------- FIX GENERATOR ----------------
-
-def generate_fix(log_text):
-    log = log_text.lower()
-
-    if "exit 1" in log:
-        return {
-            "issue": "exit 1",
-            "fix": "Remove 'exit 1' or handle errors properly",
-            "fixed_code": "echo Build Successful"
-        }
-
-    elif "cannot run program" in log:
-        return {
-            "issue": "cannot run program",
-            "fix": "Use Linux-compatible commands",
-            "fixed_code": "echo Hello from Linux"
-        }
-
-    return {
-        "issue": "unknown",
-        "fix": "Manual investigation required",
-        "fixed_code": ""
-    }
-
-
-# ---------------- CONFIDENCE ENGINE ----------------
-
-def confidence_score(log_text):
-    log = log_text.lower()
-
-    if "exit 1" in log:
-        return 95
-    elif "cannot run program" in log:
-        return 90
-    elif "failure" in log:
-        return 85
-
-    return 60
-
-
-# ---------------- SEVERITY ENGINE (NEW 🔥) ----------------
-
-def detect_severity(log_text):
-    log = log_text.lower()
-
-    if "exit 1" in log or "failure" in log:
-        return "HIGH"
-    elif "warning" in log:
-        return "MEDIUM"
-    return "LOW"
-
-
-# ---------------- AI ANALYZER (IMPROVED 🔥) ----------------
+# ---------------- AI ----------------
 
 def analyze_with_ai(log_text):
     try:
-        cleaned = clean_log(log_text)
-
         response = requests.post(
             "http://localhost:11434/api/generate",
             json={
@@ -167,339 +87,184 @@ def analyze_with_ai(log_text):
                 "prompt": f"""
 You are a senior DevOps engineer.
 
-Analyze this Jenkins log:
+Analyze the Jenkins log carefully and extract the exact failure.
 
-{cleaned}
+Log:
+{log_text}
 
-Return ONLY JSON:
+Return STRICT JSON ONLY:
 
 {{
-  "error_type": "...",
-  "root_cause": "...",
-  "fix": "..."
+  "error_type": "short label",
+  "root_cause": "exact reason",
+  "fix": "practical solution"
 }}
 """,
                 "stream": False
             }
         )
 
-        data = response.json()
-        result = data.get("response", "")
-
-        # Try parsing JSON safely
-        try:
-            parsed = json.loads(result)
-            return json.dumps(parsed, indent=2)
-        except:
-            return result  # fallback
+        return response.json().get("response", "")
 
     except Exception as e:
-        return f"AI Error: {str(e)}"
+        return json.dumps({
+            "error_type": "AI Error",
+            "root_cause": str(e),
+            "fix": "Check AI service"
+        })
 
 
-# ---------------- MAIN SYSTEM ----------------
+# ---------------- PARSER (IMPROVED 🔥) ----------------
 
-def main():
-    with open("logs.txt", "r") as f:
-        logs = f.read()
+def parse_ai_response(ai_raw):
+    try:
+        start = ai_raw.find("{")
+        end = ai_raw.rfind("}") + 1
 
-    print("\n🚀 AutoFix CI - Analysis Started")
+        if start != -1 and end != -1:
+            return json.loads(ai_raw[start:end])
 
-    # CLEAN LOG
-    logs = clean_log(logs)
+    except Exception:
+        pass
 
-    # MEMORY
-    print("\n--- Memory Check ---")
-    memory = check_memory(logs)
+    return {
+        "error_type": "Unknown",
+        "root_cause": ai_raw[:200],
+        "fix": "Manual investigation required"
+    }
 
-    if memory:
-        print("⚡ Known Issue Found")
-        print(memory)
-        return
 
-    # RULE
-    print("\n--- Rule-based Analysis ---")
-    rule = rule_based_analysis(logs)
+# ---------------- HYBRID ANALYSIS (NEW 🔥) ----------------
+
+def hybrid_analysis(log_text):
+    """
+    Rule-first → AI fallback
+    """
+
+    rule = rule_based_analysis(log_text)
 
     if rule:
-        print(f"Error: {rule['error']}")
-        print(f"Reason: {rule['reason']}")
-
-    # AI
-    print("\n--- AI Analysis ---")
-    ai = analyze_with_ai(logs)
-    print(ai)
-
-    # FIX
-    print("\n--- Auto Fix ---")
-    fix = generate_fix(logs)
-    print(fix)
-
-    # SEVERITY
-    print("\n--- Severity ---")
-    print(detect_severity(logs))
-
-    # CONFIDENCE
-    print("\n--- Confidence ---")
-    print(f"{confidence_score(logs)}%")
-
-    # STORE
-    update_memory(fix["issue"], fix["fix"])
-    print("\n✅ Memory Updated")
-
-
-if __name__ == "__main__":
-    main()
-
-import requests
-import json
-import re
-
-MEMORY_FILE = "memory.json"
-
-# ---------------- LOG PREPROCESSING (NEW 🔥) ----------------
-
-def clean_log(log_text):
-    """Remove noise and keep important lines"""
-    lines = log_text.split("\n")
-    important = []
-
-    for line in lines:
-        if any(keyword in line.lower() for keyword in [
-            "error", "fail", "exception", "exit", "cannot"
-        ]):
-            important.append(line)
-
-    return "\n".join(important) if important else log_text
-
-
-def extract_error_keyword(log_text):
-    """Extract main error keyword for memory matching"""
-    patterns = ["exit 1", "cannot run program", "failure", "exception"]
-
-    for p in patterns:
-        if p in log_text.lower():
-            return p
-
-    return "unknown"
-
-
-# ---------------- MEMORY SYSTEM ----------------
-
-def load_memory():
-    try:
-        with open(MEMORY_FILE, "r") as f:
-            return json.load(f)
-    except:
-        return {"failures": []}
-
-
-def save_memory(memory):
-    with open(MEMORY_FILE, "w") as f:
-        json.dump(memory, f, indent=4)
-
-
-def check_memory(log_text):
-    memory = load_memory()
-    keyword = extract_error_keyword(log_text)
-
-    for item in memory["failures"]:
-        if item["error"] == keyword:
-            return item
-
-    return None
-
-
-def update_memory(error, solution):
-    memory = load_memory()
-
-    for item in memory["failures"]:
-        if item["error"] == error:
-            item["count"] += 1
-            save_memory(memory)
-            return
-
-    memory["failures"].append({
-        "error": error,
-        "solution": solution,
-        "count": 1
-    })
-
-    save_memory(memory)
-
-
-# ---------------- RULE-BASED ANALYZER ----------------
-
-def rule_based_analysis(log_text):
-    log = log_text.lower()
-
-    if "cannot run program" in log:
         return {
-            "error": "Environment Error",
-            "reason": "Wrong OS command (Windows vs Linux)"
+            "error_type": rule["error"],
+            "root_cause": rule["reason"],
+            "fix": "Apply rule-based fix"
         }
 
-    elif "exit 1" in log:
+    ai_raw = analyze_with_ai(log_text)
+    return parse_ai_response(ai_raw)
+
+
+# ---------------- FIX ENGINE ----------------
+
+def generate_fix(ai_data):
+    error = (ai_data.get("error_type") or "").lower()
+    cause = (ai_data.get("root_cause") or "").lower()
+
+    if "permission" in error:
         return {
-            "error": "Script Failure",
-            "reason": "Script exited with non-zero status"
+            "issue": "Permission Issue",
+            "fix": "Run chmod +x on script",
+            "fixed_code": "chmod +x script.sh"
         }
 
-    elif "marked build as failure" in log:
+    elif "not found" in error:
         return {
-            "error": "Build Failure",
-            "reason": "Pipeline step failed"
+            "issue": "Command Missing",
+            "fix": "Install dependency or fix PATH",
+            "fixed_code": "sudo apt install <tool>"
         }
 
-    return None
-
-
-# ---------------- FIX GENERATOR ----------------
-
-def generate_fix(log_text):
-    log = log_text.lower()
-
-    if "exit 1" in log:
+    elif "connection" in error:
         return {
-            "issue": "exit 1",
-            "fix": "Remove 'exit 1' or handle errors properly",
-            "fixed_code": "echo Build Successful"
+            "issue": "Network Issue",
+            "fix": "Check service/network",
+            "fixed_code": "ping localhost"
         }
 
-    elif "cannot run program" in log:
+    elif "file" in error:
         return {
-            "issue": "cannot run program",
-            "fix": "Use Linux-compatible commands",
-            "fixed_code": "echo Hello from Linux"
+            "issue": "File Path Issue",
+            "fix": "Verify file exists",
+            "fixed_code": "ls -l"
+        }
+
+    elif "exit" in cause:
+        return {
+            "issue": "Script Failure",
+            "fix": "Remove exit 1",
+            "fixed_code": "echo Success"
         }
 
     return {
-        "issue": "unknown",
-        "fix": "Manual investigation required",
+        "issue": ai_data.get("error_type"),
+        "fix": ai_data.get("fix"),
         "fixed_code": ""
     }
 
 
-# ---------------- CONFIDENCE ENGINE ----------------
-
-def confidence_score(log_text):
-    log = log_text.lower()
-
-    if "exit 1" in log:
-        return 95
-    elif "cannot run program" in log:
-        return 90
-    elif "failure" in log:
-        return 85
-
-    return 60
+def generate_advanced_fix(ai_data):
+    return {
+        "primary_fix": ai_data.get("fix"),
+        "alternative_fix": "Retry with debug logs",
+        "best_practice": "Use proper error handling",
+        "example_code": "set -e"
+    }
 
 
-# ---------------- SEVERITY ENGINE (NEW 🔥) ----------------
+# ---------------- CONFIDENCE ----------------
 
-def detect_severity(log_text):
-    log = log_text.lower()
+def confidence_score(ai_data):
+    error = ai_data.get("error_type", "").lower()
 
-    if "exit 1" in log or "failure" in log:
-        return "HIGH"
-    elif "warning" in log:
-        return "MEDIUM"
-    return "LOW"
+    if error == "unknown":
+        return 60
 
+    weights = {
+        "permission": 95,
+        "connection": 90,
+        "file": 88,
+        "script": 92,
+        "command": 89
+    }
 
-# ---------------- AI ANALYZER (IMPROVED 🔥) ----------------
+    for key, value in weights.items():
+        if key in error:
+            return value
 
-def analyze_with_ai(log_text):
-    try:
-        cleaned = clean_log(log_text)
-
-        response = requests.post(
-            "http://localhost:11434/api/generate",
-            json={
-                "model": "llama3",
-                "prompt": f"""
-You are a senior DevOps engineer.
-
-Analyze this Jenkins log:
-
-{cleaned}
-
-Return ONLY JSON:
-
-{{
-  "error_type": "...",
-  "root_cause": "...",
-  "fix": "..."
-}}
-""",
-                "stream": False
-            }
-        )
-
-        data = response.json()
-        result = data.get("response", "")
-
-        # Try parsing JSON safely
-        try:
-            parsed = json.loads(result)
-            return json.dumps(parsed, indent=2)
-        except:
-            return result  # fallback
-
-    except Exception as e:
-        return f"AI Error: {str(e)}"
+    return 85
 
 
-# ---------------- MAIN SYSTEM ----------------
+# ---------------- AUTONOMOUS EVALUATION ----------------
 
-def main():
-    with open("logs.txt", "r") as f:
-        logs = f.read()
+def autonomous_evaluation(logs_list):
+    results = []
+    error_groups = defaultdict(list)
 
-    print("\n🚀 AutoFix CI - Analysis Started")
+    for log in logs_list:
 
-    # CLEAN LOG
-    logs = clean_log(logs)
+        result = hybrid_analysis(log)
 
-    # MEMORY
-    print("\n--- Memory Check ---")
-    memory = check_memory(logs)
+        error_type = result.get("error_type", "Unknown")
+        confidence = confidence_score(result)
 
-    if memory:
-        print("⚡ Known Issue Found")
-        print(memory)
-        return
+        results.append({
+            "log": log,
+            "error_type": error_type,
+            "confidence": confidence
+        })
 
-    # RULE
-    print("\n--- Rule-based Analysis ---")
-    rule = rule_based_analysis(logs)
+        error_groups[error_type].append(log)
 
-    if rule:
-        print(f"Error: {rule['error']}")
-        print(f"Reason: {rule['reason']}")
+    total = len(results)
+    unique_errors = len(error_groups)
 
-    # AI
-    print("\n--- AI Analysis ---")
-    ai = analyze_with_ai(logs)
-    print(ai)
+    avg_conf = sum(r["confidence"] for r in results) / total
 
-    # FIX
-    print("\n--- Auto Fix ---")
-    fix = generate_fix(logs)
-    print(fix)
+    consistency = sum(len(v)**2 for v in error_groups.values()) / (total**2)
 
-    # SEVERITY
-    print("\n--- Severity ---")
-    print(detect_severity(logs))
-
-    # CONFIDENCE
-    print("\n--- Confidence ---")
-    print(f"{confidence_score(logs)}%")
-
-    # STORE
-    update_memory(fix["issue"], fix["fix"])
-    print("\n✅ Memory Updated")
-
-
-if __name__ == "__main__":
-    main()
+    return {
+        "results": results,
+        "unique_errors": unique_errors,
+        "avg_confidence": avg_conf,
+        "consistency": round(consistency * 100, 2)
+    }

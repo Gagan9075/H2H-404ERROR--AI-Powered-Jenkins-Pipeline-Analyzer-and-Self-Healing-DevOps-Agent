@@ -1,252 +1,219 @@
 # 🚀 AutoFix CI — Self-Healing DevOps AI
 
-### 🚧 Hack2Hire Project | Intelligent CI/CD Failure Analyzer
+### ⚡ Intelligent, Adaptive CI/CD Failure Analyzer
 
-> 💡 Transform Jenkins failures into actionable insights using AI + rule-based intelligence
+> From static debugging → to a **self-learning, API-driven DevOps system**
 
 ---
 
 ## 📑 Table of Contents
 
-* [Overview](#-overview)
-* [Why This Project?](#-why-this-project)
-* [Solution](#-solution)
-* [System Architecture](#-system-architecture)
-* [Pipeline Flow](#-pipeline-flow)
-* [Decision Engine Flow](#-decision-engine-flow-new)
-* [Key Features](#-key-features)
-* [Tech Stack](#️-tech-stack)
-* [Project Structure](#-project-structure)
-* [Setup & Run](#-setup--run)
-* [Example Output](#-example-output)
-* [Future Scope](#-future-scope)
+* [Live System Status](#-live-system-status)
+* [What Makes This Dynamic](#-what-makes-this-dynamic)
+* [Dynamic Workflow](#️-dynamic-workflow)
+* [Key Capabilities](#-key-capabilities-live-behavior)
+* [System Architecture](#️-system-architecture-production-ready)
+* [API-Driven Design](#-api-driven-design)
+* [Project Structure](#-project-structure-evolving-system)
+* [Run the System](#-run-the-system)
+* [Dynamic Example](#-dynamic-example)
+* [Future Evolution](#-future-evolution)
+* [Why This Project Stands Out](#-why-this-project-stands-out)
 * [Team](#-team)
+* [Final Thought](#-final-thought)
 
 ---
 
-## 📌 Overview
+## 🔥 Live System Status
 
-AutoFix CI is an **AI-powered DevOps assistant** that analyzes Jenkins pipeline failures and provides:
-
-* ❌ Error identification
-* 🧠 Root cause analysis
-* 🛠 Actionable fixes
-* 🔁 Learning from past failures
-
----
-
-## 🚀 Why This Project?
-
-Debugging CI/CD pipelines is:
-
-* ⏳ Time-consuming
-* 🧩 Hard to interpret
-* 🔁 Repetitive
-
-Developers waste time reading logs instead of fixing problems.
+* 🟢 Backend: FastAPI Microservice
+* 🟢 Frontend: Streamlit UI
+* 🟢 AI Engine: LLaMA3 (via Ollama)
+* 🟢 Mode: Hybrid (Rule + AI + Fallback)
+* 🧠 Memory: Continuously learning
 
 ---
 
-## 💡 Solution
+## 🧠 What Makes This Dynamic
 
-AutoFix CI introduces a **multi-layer intelligent system**:
+AutoFix CI is **not a static analyzer** — it evolves:
 
-1. 🧹 Cleans noisy logs
-2. 🧠 Checks past failures (memory system)
-3. ⚙️ Applies rule-based detection
-4. 🤖 Uses AI for deep reasoning
-5. 🛠 Generates fixes
-6. 📊 Calculates confidence & severity
-
----
-
-## 🧠 System Architecture
-
-```mermaid
-flowchart TD
-    A[User Input: Jenkins Logs] --> B[Log Preprocessing]
-    B --> C[Memory Engine]
-    C --> D[Rule-Based Engine]
-    D --> E[AI Analyzer - LLaMA3]
-    E --> F[Fix Generator]
-    F --> G[Confidence Engine]
-    G --> H[Severity Detector]
-    H --> I[Final Output]
-    I --> J[Memory Update]
-```
+* Learns from past failures (`memory.json`)
+* Switches between Rule-based & AI reasoning
+* Falls back intelligently when systems fail
+* Adapts to unseen logs without retraining
+* Operates via real-time API architecture
 
 ---
 
-## ⚙️ Pipeline Flow
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant UI
-    participant Analyzer
-    participant AI
-    participant Memory
-
-    User->>UI: Paste Jenkins Log
-    UI->>Analyzer: Send Log
-    Analyzer->>Memory: Check Known Issue
-    Memory-->>Analyzer: Match / No Match
-    Analyzer->>Analyzer: Rule-Based Check
-    Analyzer->>AI: Send Processed Log
-    AI-->>Analyzer: Root Cause + Fix
-    Analyzer-->>UI: Display Results
-    Analyzer->>Memory: Store Learning
-```
-
----
-
-## 🧠 Decision Engine Flow (NEW)
+## ⚙️ Dynamic Workflow
 
 ```mermaid
 flowchart LR
-    A[Incoming Log] --> B{Memory Match?}
-    B -->|Yes| C[Return Stored Solution]
-    B -->|No| D{Rule Match?}
-    D -->|Yes| E[Apply Rule Fix]
-    D -->|No| F[Send to AI]
-    F --> G[Generate Fix]
-    G --> H[Store in Memory]
+    A[User Input Log] --> B[Streamlit UI]
+    B --> C[FastAPI Backend]
+    C --> D{Hybrid Engine}
+    D -->|Rule Match| E[Rule-Based Analysis]
+    D -->|No Match| F[AI Analysis]
+    E --> G[Fix Generator]
+    F --> G
+    G --> H[Response]
+    H --> I[Memory Update]
 ```
 
 ---
 
-## 🌟 Key Features
+## 🌟 Key Capabilities (Live Behavior)
 
-### 🧹 Log Preprocessing (NEW 🔥)
+### 🔍 Hybrid Intelligence
 
-* Filters only important error lines
-* Improves AI accuracy
+* Detects known patterns instantly
+* Uses AI for unknown issues
+* Combines both for higher accuracy
 
----
+### 🧠 Self-Learning Memory
 
-### 🧠 Memory Learning System
+* Stores failures dynamically
+* Improves suggestions over time
+* Tracks frequency of errors
 
-* Stores failures in `memory.json`
-* Learns over time
-* Reduces repeated debugging
+### 🛠 Smart Fix Engine
 
----
+* Generates contextual fixes
+* Suggests commands and best practices
 
-### ⚙️ Rule-Based Engine
+### 🔁 Pipeline Simulation
 
-* Detects common failures instantly
-* Example:
+* Visualizes failure → success
+* Validates fix effectiveness
 
-  * `exit 1`
-  * `cannot run program`
+### 📊 Dynamic Analytics
 
----
+* Real-time failure trends
+* Most frequent errors
+* Confidence tracking
 
-### 🤖 AI-Powered Analysis
+### 🤖 Autonomous Evaluation
 
-* Uses LLaMA3 via Ollama
-* Provides human-readable explanations
-
----
-
-### 🛠 Auto Fix Engine
-
-* Suggests fixes
-* Provides corrected commands
+* No labeled data required
+* Measures confidence, consistency, clustering
 
 ---
 
-### 📊 Confidence Scoring
+## 🏗️ System Architecture (Production Ready)
 
-* Shows reliability of detection
-
----
-
-### 🚨 Severity Detection (NEW 🔥)
-
-* HIGH → Critical failure
-* MEDIUM → Warning
-* LOW → Minor issue
-
----
-
-## 🛠️ Tech Stack
-
-| Layer    | Technology      |
-| -------- | --------------- |
-| Backend  | Python          |
-| UI       | Streamlit       |
-| AI Model | LLaMA3 (Ollama) |
-| API      | Requests        |
-| Storage  | JSON            |
+```mermaid
+flowchart LR
+    A[Streamlit UI] --> B[FastAPI API]
+    B --> C[Analyzer Engine]
+    C --> D[Rule Engine]
+    C --> E[AI Engine]
+    C --> F[Memory System]
+```
 
 ---
 
-## 📂 Project Structure
+## 📡 API-Driven Design
+
+### Endpoint
+
+```http
+POST /analyze
+```
+
+### Request
+
+```json
+{
+  "log": "jenkins error log here"
+}
+```
+
+### Response
+
+```json
+{
+  "rule": {...},
+  "ai": {...},
+  "fix": {...}
+}
+```
+
+---
+
+## 📂 Project Structure (Evolving System)
 
 ```
 Hack2Hire/
- ├── app.py
- ├── final_analyzer.py
- ├── logs.txt
- ├── memory.json
- ├── requirements.txt
- ├── .gitignore
- ├── README.md
- ├── LICENSE
+ ├── app.py              # Streamlit UI (Client)
+ ├── api.py              # FastAPI Backend (Server)
+ ├── final_analyzer.py   # Intelligence Engine
+ ├── memory.json         # Learned Knowledge Base
+ ├── logs.txt            # Sample logs
+ ├── requirements.txt    # Dependencies
+ ├── README.md           # Documentation
 ```
 
 ---
 
-## 🚀 Setup & Run
+## 🚀 Run the System
 
-### 1️⃣ Install dependencies
+### 1️⃣ Start Backend
 
-```
-pip install -r requirements.txt
-```
-
-### 2️⃣ Start AI Model
-
-```
-ollama run llama3
+```bash
+python -m uvicorn api:app --reload
 ```
 
-### 3️⃣ Run UI
+### 2️⃣ Start Frontend
 
-```
-streamlit run app.py
+```bash
+python -m streamlit run app.py
 ```
 
 ---
 
-## 🧪 Example Output
+## 🧪 Dynamic Example
 
-### Input Log
+### Input
 
 ```
-+ echo Hello Jenkins
-+ exit 1
-Build step 'Execute shell' marked build as failure
+docker: command not found
 ```
+
+### System Behavior
+
+* Rule Engine detects issue
+* AI validates root cause
+* Fix Engine generates solution
+* Memory stores pattern
 
 ### Output
 
-* ❌ Error: Script Failure
-* 📌 Reason: Script exited with non-zero status
-* 🛠 Fix: Remove `exit 1`
-* 📊 Confidence: 95%
-* 🚨 Severity: HIGH
+```
+Error Type: Command Not Found  
+Root Cause: Docker not installed  
+Fix: Install Docker and verify PATH  
+```
 
 ---
 
-## 🔮 Future Scope
+## 🔮 Future Evolution
 
-* 📊 Analytics dashboard
-* 🔁 Auto pipeline healing
-* ☁️ Cloud deployment
-* 🔗 GitHub Actions integration
-* 🤖 Multi-agent AI system
+* 🔗 Jenkins webhook automation
+* 🐳 Dockerized deployment
+* ☁️ Cloud hosting
+* 📊 Advanced dashboards
+* 🧠 Continuous learning
+
+---
+
+## 🎯 Why This Project Stands Out
+
+✔ Hybrid AI + Rule-based system
+✔ Microservice architecture
+✔ Real-time API communication
+✔ Self-learning memory
+✔ Autonomous evaluation
 
 ---
 
@@ -259,12 +226,9 @@ Build step 'Execute shell' marked build as failure
 
 ---
 
-## 📌 Conclusion
+## 📌 Final Thought
 
-AutoFix CI transforms DevOps debugging by combining:
+AutoFix CI is not just a tool —
+it’s a step toward **self-healing DevOps pipelines** 🚀
 
-* Rule-based intelligence
-* AI reasoning
-* Memory-based learning
-
-➡️ Making CI/CD pipelines smarter, faster, and self-healing 🚀
+---
