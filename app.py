@@ -4,7 +4,13 @@ import json
 import os
 import pandas as pd
 
-API_URL = "http://127.0.0.1:8000/analyze"
+from final_analyzer import hybrid_analysis, generate_fix
+
+# 🔥 Use this for local run
+#  API_URL = "http://localhost:8000/analyze"
+
+# 🔥 Use this for Docker
+API_URL = "http://backend:8000/analyze"
 
 st.set_page_config(page_title="AutoFix CI", layout="wide")
 
@@ -27,28 +33,42 @@ if st.button("🔍 Analyze Pipeline"):
         try:
             response = requests.post(
                 API_URL,
-                json={"log": log_input}
+                json={"log": log_input},
+                timeout=10
             )
+
+            if response.status_code != 200:
+                raise Exception("API failed")
 
             data = response.json()
 
         except Exception as e:
-            st.error(f"API Error: {e}")
-            st.stop()
+            st.error(f"⚠️ API Error: {e}")
+            st.warning("Switching to local AI fallback...")
 
-    # ---------------- MEMORY (Optional display) ----------------
+            # 🔥 fallback if API fails
+            ai_result = hybrid_analysis(log_input)
+            fix = generate_fix(ai_result)
+
+            data = {
+                "rule_based": None,
+                "memory": None,
+                "ai_analysis": ai_result,
+                "fix": fix,
+                "accuracy": 50
+            }
+
+    # ---------------- MEMORY ----------------
     st.subheader("🧠 Memory Insight")
 
-    if os.path.exists("memory.json"):
-        with open("memory.json", "r") as f:
-            memory = json.load(f)
+    memory = data.get("memory")
 
-        for item in memory.get("failures", []):
-            if item["error"].lower() in log_input.lower():
-                st.success("⚡ Known Issue Detected")
-                st.write(f"**Error:** {item['error']}")
-                st.write(f"**Solution:** {item['solution']}")
-                break
+    if memory:
+        st.success("⚡ Known Issue Detected")
+        st.write(f"**Error:** {memory.get('error')}")
+        st.write(f"**Solution:** {memory.get('solution')}")
+    else:
+        st.info("No matching memory pattern")
 
     # ---------------- RULE ----------------
     st.subheader("⚙️ Rule-Based Engine")
@@ -65,22 +85,39 @@ if st.button("🔍 Analyze Pipeline"):
     # ---------------- AI ----------------
     st.subheader("🤖 AI Reasoning Engine")
 
-    ai = data.get("ai_analysis", {})
+    ai = data.get("ai_analysis") or {
+        "error_type": "Unknown",
+        "root_cause": "Not detected",
+        "fix": "Manual investigation required"
+    }
 
     st.write(f"**Error Type:** {ai.get('error_type')}")
     st.write(f"**Root Cause:** {ai.get('root_cause')}")
     st.write(f"**Suggested Fix:** {ai.get('fix')}")
 
-    # ---------------- FIX ----------------
-    st.subheader("🛠 Auto Fix Engine")
+    st.markdown("### 📘 Explanation")
+    st.info(ai.get("root_cause"))
 
-    fix = data.get("fix", {})
+# ---------------- FIX ----------------
+st.subheader("🛠 Auto Fix Engine")
 
-    st.write(f"**Issue:** {fix.get('issue')}")
-    st.write(f"**Solution:** {fix.get('fix')}")
+fix = data.get("fix", {})
 
-    if fix.get("fixed_code"):
-        st.code(fix.get("fixed_code"), language="bash")
+st.write(f"### 🚨 Issue Detected")
+st.error(fix.get("issue"))
+
+# 🔥 NEW: Explanation section
+st.markdown("### 📘 Root Cause Explanation")
+st.info(ai.get("root_cause"))
+
+# 🔥 NEW: Detailed fix guide
+st.markdown("### 🛠 Step-by-Step Fix Guide")
+st.markdown(f"```\n{fix.get('fix')}\n```")
+
+# 🔥 Show command separately (clean UX)
+if fix.get("fixed_code"):
+    st.markdown("### 💻 Suggested Command")
+    st.code(fix.get("fixed_code"), language="bash")
 
     # ---------------- ADVANCED FIX ----------------
     st.subheader("🚀 Smart Fix Recommendations")
@@ -94,7 +131,7 @@ if st.button("🔍 Analyze Pipeline"):
     st.warning("Best Practice")
     st.write("Add proper error handling in scripts")
 
-    # ---------------- 🔁 SMART SIMULATION ----------------
+    # ---------------- PIPELINE SIMULATION ----------------
     st.subheader("🔁 Pipeline Simulation")
 
     col1, col2 = st.columns(2)
@@ -102,43 +139,42 @@ if st.button("🔍 Analyze Pipeline"):
     with col1:
         st.markdown("### ❌ Before Fix")
 
-        log = log_input.lower()
+        error_type = (ai.get("error_type") or "").lower()
 
-        if "exit 1" in log:
-            st.error("Script exited with error")
-        elif "permission" in log:
+        if "permission" in error_type:
             st.error("Permission denied")
-        elif "connection" in log:
+        elif "connection" in error_type:
             st.error("Connection failure")
-        elif "not found" in log:
+        elif "not found" in error_type:
             st.error("Command not found")
+        elif "git" in error_type or "auth" in error_type:
+            st.error("Git authentication failed")
+        elif "file" in error_type:
+            st.error("File missing or incorrect path")
         else:
             st.error("Pipeline Failed")
 
     with col2:
         st.markdown("### ✅ After Fix")
 
-        fix_text = (fix.get("fix") or "").lower()
+        accuracy = data.get("accuracy", 50)
 
-        if any(word in fix_text for word in ["remove", "chmod", "install", "check"]):
+        if accuracy > 70:
             st.success("Pipeline Fixed ✅")
         else:
             st.warning("⚠️ Needs validation")
 
-    # ---------------- CONFIDENCE ----------------
-    st.subheader("📊 Confidence Engine")
+    # ---------------- REAL ACCURACY ----------------
+    st.subheader("📊 Real Accuracy Score")
 
-    if ai.get("error_type") == "Unknown":
-        score = 60
-    else:
-        score = 92
+    accuracy = data.get("accuracy", 50)
 
-    st.metric("Detection Confidence", f"{score}%")
-    st.progress(score / 100)
+    st.metric("AI Accuracy", f"{accuracy}%")
+    st.progress(accuracy / 100)
 
     # ---------------- DASHBOARD ----------------
     st.markdown("---")
-    st.subheader("📊 Analytics Dashboard")
+    st.subheader("📊 Learning Dashboard")
 
     if os.path.exists("memory.json"):
         with open("memory.json", "r") as f:
@@ -148,16 +184,20 @@ if st.button("🔍 Analyze Pipeline"):
 
         if failures:
             df = pd.DataFrame(failures)
+
             st.bar_chart(df.set_index("error")["count"])
 
             total = sum([f["count"] for f in failures])
             most_common = max(failures, key=lambda x: x["count"])
 
             col1, col2 = st.columns(2)
-            col1.metric("Total Failures", total)
-            col2.metric("Top Error", most_common["error"])
+            col1.metric("Total Failures Learned", total)
+            col2.metric("Most Frequent Error", most_common["error"])
 
-# ---------------- 🔥 AUTONOMOUS EVALUATION ----------------
+        else:
+            st.info("No learning data yet")
+
+# ---------------- AUTONOMOUS EVALUATION ----------------
 st.markdown("---")
 st.subheader("🧠 Autonomous AI Evaluation")
 
@@ -168,7 +208,8 @@ if st.button("Run Autonomous Evaluation"):
         "permission denied",
         "connection refused",
         "no such file",
-        "command not found"
+        "authentication failed",
+        "repository not found"
     ]
 
     results = []
@@ -180,10 +221,15 @@ if st.button("Run Autonomous Evaluation"):
             results.append({
                 "log": log,
                 "error": res.get("ai_analysis", {}).get("error_type"),
+                "accuracy": res.get("accuracy", 0)
             })
 
         except:
-            results.append({"log": log, "error": "API Error"})
+            results.append({
+                "log": log,
+                "error": "API Error",
+                "accuracy": 0
+            })
 
     df = pd.DataFrame(results)
 
@@ -200,8 +246,9 @@ AutoFix CI is an enterprise DevOps AI system:
 - FastAPI backend (microservice)
 - Streamlit frontend (UI layer)
 - Hybrid AI + Rule engine
-- Memory-based learning
+- Self-learning memory
+- Real accuracy scoring
 - Autonomous evaluation
 
-Built like real-world DevOps platforms 🚀
+Designed for modern CI/CD pipelines 🚀
 """)

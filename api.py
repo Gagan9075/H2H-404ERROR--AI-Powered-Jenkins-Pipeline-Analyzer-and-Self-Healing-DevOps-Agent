@@ -1,20 +1,16 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-
-from final_analyzer import (
-    rule_based_analysis,
-    analyze_with_ai,
-    parse_ai_response,
-    generate_fix
-)
+from final_analyzer import *
 
 app = FastAPI()
 
 
+# ---------------- REQUEST MODEL ----------------
 class LogRequest(BaseModel):
     log: str
 
 
+# ---------------- HEALTH CHECK ----------------
 @app.get("/")
 def home():
     return {
@@ -23,31 +19,32 @@ def home():
     }
 
 
+# ---------------- ANALYZE ----------------
 @app.post("/analyze")
-def analyze(data: LogRequest):
+def analyze(request: LogRequest):
 
-    log = data.log
+    log = request.log
 
-    # Rule-based
-    rule = rule_based_analysis(log)
+    # 🔥 FULL HYBRID RESULT
+    result = hybrid_analysis(log)
 
-    # AI
-    ai_raw = analyze_with_ai(log)
-    ai_data = parse_ai_response(ai_raw)
+    rule = result["rule"]
+    memory = result["memory"]
+    ai = result["ai"]
 
-    # Fallback if AI fails
-    if ai_data.get("error_type") == "Unknown" and rule:
-        ai_data = {
-            "error_type": rule["error"],
-            "root_cause": rule["reason"],
-            "fix": "Fix based on rule-based detection"
-        }
+    # 🔧 FIX
+    fix = generate_fix(ai)
 
-    # Fix generation
-    fix = generate_fix(ai_data)
+    # 📊 REAL ACCURACY
+    accuracy = evaluate_accuracy(rule, ai, memory)
+
+    # 🧠 SELF LEARNING
+    update_memory(ai.get("error_type"), ai.get("fix"))
 
     return {
-        "rule": rule,
-        "ai": ai_data,
-        "fix": fix
+        "rule_based": rule,
+        "memory": memory,
+        "ai_analysis": ai,
+        "fix": fix,
+        "accuracy": accuracy
     }

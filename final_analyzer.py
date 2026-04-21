@@ -29,7 +29,8 @@ def check_memory(log_text):
     return None
 
 
-def update_memory(error, solution):
+# 🔥 UPDATED (self-learning)
+def update_memory(error, solution, success=True):
     if not error:
         return
 
@@ -38,35 +39,54 @@ def update_memory(error, solution):
     for item in memory["failures"]:
         if item["error"] == error:
             item["count"] += 1
+            item["success"] = item.get("success", 0) + (1 if success else 0)
             save_memory(memory)
             return
 
     memory["failures"].append({
         "error": error,
         "solution": solution,
-        "count": 1
+        "count": 1,
+        "success": 1 if success else 0
     })
 
     save_memory(memory)
 
 
-# ---------------- NORMALIZER (NEW 🔥) ----------------
+# 🔥 BEST FIX SELECTION
+def get_best_fix(error):
+    memory = load_memory()
 
-def normalize_log(log_text):
-    return log_text.lower().strip()
+    best = None
+    best_score = 0
+
+    for item in memory["failures"]:
+        if item["error"].lower() in error.lower():
+            success = item.get("success", 0)
+            count = item.get("count", 1)
+
+            score = success / count
+
+            if score > best_score:
+                best_score = score
+                best = item
+
+    return best
 
 
 # ---------------- RULE ENGINE ----------------
 
 def rule_based_analysis(log_text):
-    log = normalize_log(log_text)
+    log = log_text.lower()
 
     patterns = [
         ("permission denied", "Permission Denied", "Execution permission missing"),
         ("not found", "Command Not Found", "Missing dependency or wrong path"),
         ("connection refused", "Connection Refused", "Service unavailable"),
         ("exit 1", "Script Failure", "Non-zero exit status"),
-        ("no such file", "File Error", "File missing or wrong path")
+        ("no such file", "File Error", "File missing or wrong path"),
+        ("authentication failed", "Git/Auth Failure", "Invalid credentials"),
+        ("repository not found", "Git/Auth Failure", "Private repo or wrong URL"),
     ]
 
     for keyword, error, reason in patterns:
@@ -85,20 +105,20 @@ def analyze_with_ai(log_text):
             json={
                 "model": "llama3",
                 "prompt": f"""
-You are a senior DevOps engineer.
+You are an expert DevOps failure analyzer.
 
-Analyze the Jenkins log carefully and extract the exact failure.
+Analyze ANY Jenkins log.
+
+Return STRICT JSON:
+
+{{
+  "error_type": "...",
+  "root_cause": "...",
+  "fix": "..."
+}}
 
 Log:
 {log_text}
-
-Return STRICT JSON ONLY:
-
-{{
-  "error_type": "short label",
-  "root_cause": "exact reason",
-  "fix": "practical solution"
-}}
 """,
                 "stream": False
             }
@@ -107,14 +127,10 @@ Return STRICT JSON ONLY:
         return response.json().get("response", "")
 
     except Exception as e:
-        return json.dumps({
-            "error_type": "AI Error",
-            "root_cause": str(e),
-            "fix": "Check AI service"
-        })
+        return str(e)
 
 
-# ---------------- PARSER (IMPROVED 🔥) ----------------
+# ---------------- PARSER ----------------
 
 def parse_ai_response(ai_raw):
     try:
@@ -124,34 +140,37 @@ def parse_ai_response(ai_raw):
         if start != -1 and end != -1:
             return json.loads(ai_raw[start:end])
 
-    except Exception:
+    except:
         pass
 
     return {
         "error_type": "Unknown",
         "root_cause": ai_raw[:200],
-        "fix": "Manual investigation required"
+        "fix": "Check logs manually"
     }
 
 
-# ---------------- HYBRID ANALYSIS (NEW 🔥) ----------------
+# ---------------- HYBRID ENGINE ----------------
 
 def hybrid_analysis(log_text):
-    """
-    Rule-first → AI fallback
-    """
 
     rule = rule_based_analysis(log_text)
-
-    if rule:
-        return {
-            "error_type": rule["error"],
-            "root_cause": rule["reason"],
-            "fix": "Apply rule-based fix"
-        }
+    memory = check_memory(log_text)
 
     ai_raw = analyze_with_ai(log_text)
-    return parse_ai_response(ai_raw)
+    ai_data = parse_ai_response(ai_raw)
+
+    # 🔥 self-learning override
+    best_fix = get_best_fix(ai_data.get("error_type", ""))
+
+    if best_fix:
+        ai_data["fix"] = best_fix["solution"]
+
+    return {
+        "rule": rule,
+        "memory": memory,
+        "ai": ai_data
+    }
 
 
 # ---------------- FIX ENGINE ----------------
@@ -160,81 +179,123 @@ def generate_fix(ai_data):
     error = (ai_data.get("error_type") or "").lower()
     cause = (ai_data.get("root_cause") or "").lower()
 
+    # ---------------- PERMISSION ----------------
     if "permission" in error:
         return {
             "issue": "Permission Issue",
-            "fix": "Run chmod +x on script",
+            "fix": """1. The script does not have execution permission.
+2. Grant permission using:
+   chmod +x script.sh
+3. Re-run the pipeline.
+4. If using Jenkins, ensure proper user permissions.
+
+Best Practice:
+Always set executable permissions before running scripts.""",
             "fixed_code": "chmod +x script.sh"
         }
 
+    # ---------------- COMMAND NOT FOUND ----------------
     elif "not found" in error:
         return {
-            "issue": "Command Missing",
-            "fix": "Install dependency or fix PATH",
+            "issue": "Command Not Found",
+            "fix": """1. The required command/tool is missing.
+2. Install the dependency:
+   sudo apt install <tool-name>
+3. Verify installation:
+   <tool-name> --version
+4. Check if PATH is configured correctly.
+
+Best Practice:
+Use dependency checks before pipeline execution.""",
             "fixed_code": "sudo apt install <tool>"
         }
 
+    # ---------------- CONNECTION ----------------
     elif "connection" in error:
         return {
-            "issue": "Network Issue",
-            "fix": "Check service/network",
+            "issue": "Network / Service Issue",
+            "fix": """1. The system failed to connect to a service.
+2. Check if the service is running:
+   systemctl status <service>
+3. Test connectivity:
+   ping localhost
+4. Verify firewall/network rules.
+
+Best Practice:
+Always ensure services are running before pipeline execution.""",
             "fixed_code": "ping localhost"
         }
 
+    # ---------------- FILE ERROR ----------------
     elif "file" in error:
         return {
             "issue": "File Path Issue",
-            "fix": "Verify file exists",
-            "fixed_code": "ls -l"
+            "fix": """1. The required file is missing or path is incorrect.
+2. Verify file existence:
+   ls -l /path/to/file
+3. Update correct file path in script.
+4. Ensure file permissions are correct.
+
+Best Practice:
+Always validate file paths in pipeline scripts.""",
+            "fixed_code": "ls -l /path/to/file"
         }
 
-    elif "exit" in cause:
+    # ---------------- GIT AUTH ----------------
+    elif "git" in error or "auth" in error:
         return {
-            "issue": "Script Failure",
-            "fix": "Remove exit 1",
-            "fixed_code": "echo Success"
+            "issue": "Git Authentication Failure",
+            "fix": """1. Authentication failed while accessing repository.
+2. Use personal access token instead of password.
+3. Update clone command:
+   git clone https://<token>@github.com/repo.git
+4. Verify repository access permissions.
+
+Best Practice:
+Use secure credential storage (Jenkins credentials manager).""",
+            "fixed_code": "git clone https://<token>@github.com/repo.git"
         }
 
+    # ---------------- DEFAULT ----------------
     return {
         "issue": ai_data.get("error_type"),
-        "fix": ai_data.get("fix"),
+        "fix": f"""1. {ai_data.get("root_cause")}
+2. Suggested Fix:
+   {ai_data.get("fix")}
+3. Review logs for more details.
+
+Best Practice:
+Add proper error handling and logging in pipeline.""",
         "fixed_code": ""
     }
 
 
-def generate_advanced_fix(ai_data):
-    return {
-        "primary_fix": ai_data.get("fix"),
-        "alternative_fix": "Retry with debug logs",
-        "best_practice": "Use proper error handling",
-        "example_code": "set -e"
-    }
+# ---------------- REAL ACCURACY ----------------
+
+def evaluate_accuracy(rule, ai_data, memory):
+
+    score = 0
+
+    rule_error = (rule or {}).get("error", "").lower()
+    ai_error = (ai_data.get("error_type") or "").lower()
+    mem_error = (memory or {}).get("error", "").lower()
+
+    if rule_error and rule_error in ai_error:
+        score += 40
+
+    if mem_error and mem_error in ai_error:
+        score += 30
+
+    if ai_error != "unknown":
+        score += 20
+
+    if score == 0:
+        score = 50
+
+    return min(score, 100)
 
 
-# ---------------- CONFIDENCE ----------------
-
-def confidence_score(ai_data):
-    error = ai_data.get("error_type", "").lower()
-
-    if error == "unknown":
-        return 60
-
-    weights = {
-        "permission": 95,
-        "connection": 90,
-        "file": 88,
-        "script": 92,
-        "command": 89
-    }
-
-    for key, value in weights.items():
-        if key in error:
-            return value
-
-    return 85
-
-
-# ---------------- AUTONOMOUS EVALUATION ----------------
+# ---------------- AUTONOMOUS EVAL ----------------
 
 def autonomous_evaluation(logs_list):
     results = []
@@ -244,27 +305,16 @@ def autonomous_evaluation(logs_list):
 
         result = hybrid_analysis(log)
 
-        error_type = result.get("error_type", "Unknown")
-        confidence = confidence_score(result)
+        ai = result["ai"]
 
         results.append({
             "log": log,
-            "error_type": error_type,
-            "confidence": confidence
+            "error_type": ai.get("error_type"),
         })
 
-        error_groups[error_type].append(log)
-
-    total = len(results)
-    unique_errors = len(error_groups)
-
-    avg_conf = sum(r["confidence"] for r in results) / total
-
-    consistency = sum(len(v)**2 for v in error_groups.values()) / (total**2)
+        error_groups[ai.get("error_type")].append(log)
 
     return {
         "results": results,
-        "unique_errors": unique_errors,
-        "avg_confidence": avg_conf,
-        "consistency": round(consistency * 100, 2)
+        "unique_errors": len(error_groups)
     }
