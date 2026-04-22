@@ -1,16 +1,19 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from final_analyzer import *
+from final_analyzer import (
+    ai_analysis_pipeline,
+    generate_fix,
+    calculate_accuracy,
+    update_memory
+)
 
 app = FastAPI()
 
 
-# ---------------- REQUEST MODEL ----------------
 class LogRequest(BaseModel):
     log: str
 
 
-# ---------------- HEALTH CHECK ----------------
 @app.get("/")
 def home():
     return {
@@ -19,32 +22,24 @@ def home():
     }
 
 
-# ---------------- ANALYZE ----------------
 @app.post("/analyze")
 def analyze(request: LogRequest):
 
     log = request.log
 
-    # 🔥 FULL HYBRID RESULT
-    result = hybrid_analysis(log)
+    ai_result = ai_analysis_pipeline(log)
 
-    rule = result["rule"]
-    memory = result["memory"]
-    ai = result["ai"]
+    fix = generate_fix(ai_result)
 
-    # 🔧 FIX
-    fix = generate_fix(ai)
+    accuracy = calculate_accuracy(ai_result)
 
-    # 📊 REAL ACCURACY
-    accuracy = evaluate_accuracy(rule, ai, memory)
-
-    # 🧠 SELF LEARNING
-    update_memory(ai.get("error_type"), ai.get("fix"))
+    update_memory(
+        ai_result.get("error_type"),
+        ai_result.get("fix")
+    )
 
     return {
-        "rule_based": rule,
-        "memory": memory,
-        "ai_analysis": ai,
+        "ai_analysis": ai_result,
         "fix": fix,
         "accuracy": accuracy
     }

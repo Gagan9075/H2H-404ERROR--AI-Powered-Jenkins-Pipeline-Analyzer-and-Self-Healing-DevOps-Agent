@@ -1,117 +1,110 @@
 # 🚀 AutoFix CI — Self-Healing DevOps AI
 
-### ⚡ Intelligent, Adaptive, Self-Learning CI/CD Failure Analyzer
+### ⚡ Intelligent, AI-Powered CI/CD Failure Analyzer
 
-> From static debugging → to a **self-learning, API-driven DevOps intelligence system**
+> From rule-based debugging → to a **fully AI-driven, self-learning DevOps system**
 
 ---
 
 ## 📑 Table of Contents
 
-* [Live System Status](#-live-system-status)
-* [What Makes This Dynamic](#-what-makes-this-dynamic)
-* [Advanced Workflow (New)](#-advanced-workflow-new)
-* [Key Capabilities](#-key-capabilities-live-behavior)
-* [System Architecture](#️-system-architecture-production-ready)
-* [API-Driven Design](#-api-driven-design)
-* [Project Structure](#-project-structure-evolving-system)
-* [Run the System](#-run-the-system)
-* [Dynamic Example](#-dynamic-example)
-* [What’s New (Today’s Upgrade 🚀)](#-whats-new-todays-upgrade-)
-* [Future Evolution](#-future-evolution)
-* [Why This Project Stands Out](#-why-this-project-stands-out)
-* [Team](#-team)
-* [Final Thought](#-final-thought)
+* [🔥 Live System Status](#-live-system-status)
+* [🧠 What Makes This Dynamic](#-what-makes-this-dynamic)
+* [⚙️ Dynamic Workflow](#️-dynamic-workflow)
+* [🌟 Key Capabilities](#-key-capabilities-live-behavior)
+* [🏗️ System Architecture](#️-system-architecture-production-ready)
+* [📡 API Design](#-api-driven-design)
+* [🐳 Dockerized Setup](#-dockerized-setup-one-command-run)
+* [📂 Project Structure](#-project-structure-evolving-system)
+* [🧪 Dynamic Example](#-dynamic-example)
+* [📊 Learning & Accuracy](#-learning--accuracy)
+* [🔮 Future Scope](#-future-evolution)
+* [🎯 Why This Project Stands Out](#-why-this-project-stands-out)
+* [👨‍💻 Team](#-team)
+* [📌 Final Thought](#-final-thought)
 
 ---
 
 ## 🔥 Live System Status
 
-* 🟢 Backend: FastAPI Microservice
-* 🟢 Frontend: Streamlit UI
-* 🟢 AI Engine: LLaMA3 (via Ollama)
-* 🟢 Mode: Hybrid (Rule + AI + Memory + Fallback)
-* 🧠 Memory: Self-learning (with success tracking)
-* 📊 Accuracy: Real-time evaluation (no manual input)
+* 🟢 Backend: FastAPI (Microservice)
+* 🟢 Frontend: Streamlit (UI Layer)
+* 🟢 AI Engine: LLaMA3 via Ollama
+* 🟢 Deployment: Dockerized (multi-container)
+* 🧠 Memory: Self-learning enabled
+* 📊 Accuracy: Dynamically computed
 
 ---
 
 ## 🧠 What Makes This Dynamic
 
-AutoFix CI is **no longer static** — it evolves intelligently:
+AutoFix CI is **NOT a static tool**:
 
-* Learns from past failures (`memory.json`)
-* Tracks success rate of fixes
-* Automatically selects best-performing solutions
-* Uses AI + Rule + Memory agreement
-* Adapts to unseen logs using AI reasoning
-* Falls back intelligently if backend fails
-* Operates via real-time API architecture
+* Learns from failures (`memory.json`)
+* Uses **AI-first analysis (no fixed patterns)**
+* Improves fixes based on success rate
+* Works for **unknown/unseen logs**
+* Runs as **real microservice architecture**
+* Handles failures in real-time pipelines
 
 ---
 
-## ⚙️ Advanced Workflow (New)
+## ⚙️ Dynamic Workflow
 
 ```mermaid
 flowchart LR
-    A[User Input Log] --> B[Streamlit UI]
+    A[User Log] --> B[Streamlit UI]
     B --> C[FastAPI Backend]
-    C --> D[Hybrid Engine]
-
-    D --> E[Rule Engine]
-    D --> F[AI Engine]
-    D --> G[Memory System]
-
-    E --> H[Agreement Engine]
-    F --> H
-    G --> H
-
-    H --> I[Fix Generator]
-    I --> J[Response]
-    J --> K[Self-Learning Update]
+    C --> D[AI Engine (LLaMA3)]
+    D --> E[Structured Output]
+    E --> F[Fix Generator]
+    F --> G[Response to UI]
+    G --> H[Memory Update]
 ```
 
 ---
 
 ## 🌟 Key Capabilities (Live Behavior)
 
-### 🔍 Hybrid Intelligence
+### 🤖 Fully AI-Driven Analysis
 
-* Combines Rule + AI + Memory
-* Handles both known & unknown failures
-* Never returns empty results
+* No dependency on hardcoded patterns
+* Understands ANY CI/CD log
+* Extracts real root cause
 
-### 🧠 Self-Learning Fix Engine (NEW 🚀)
+### 🧠 Self-Learning Memory
 
-* Tracks error frequency and fix success rate
-* Automatically selects best fix
-* Improves over time without retraining
+* Stores past failures
+* Tracks success rate
+* Improves fixes automatically
 
-### 📊 Real Accuracy Scoring (NEW 🚀)
+### 🛠 Smart Fix Engine
 
-* No manual input required
-* Based on rule vs AI vs memory agreement
-* Provides realistic confidence score
+* Generates step-by-step solutions
+* Context-aware recommendations
 
-### 🛠 Advanced Fix Engine
+### 📊 Real Accuracy Scoring
 
-* Step-by-step solutions
-* Real command examples
-* Best practices included
+* Confidence based on:
 
-### 🔁 Smart Pipeline Simulation
+  * AI certainty
+  * historical success
+* Not manually entered
 
-* Shows failure → success transition
-* Uses AI + accuracy score
+### 🔁 Pipeline Simulation
 
-### 📈 Learning Dashboard
+* Shows:
 
-* Tracks system learning and failure trends
+  * Before fix ❌
+  * After fix ✅
 
-### 🤖 Autonomous Evaluation
+### 📊 Learning Dashboard
 
-* Evaluates system across multiple logs
-* Measures accuracy and consistency
+* Tracks:
+
+  * failure frequency
+  * most common issues
+  * system learning growth
 
 ---
 
@@ -120,11 +113,9 @@ flowchart LR
 ```mermaid
 flowchart LR
     A[Streamlit UI] --> B[FastAPI Backend]
-    B --> C[Analyzer Engine]
-    C --> D[Rule Engine]
-    C --> E[AI Engine]
-    C --> F[Memory System]
-    C --> G[Accuracy Engine]
+    B --> C[AI Analyzer]
+    C --> D[Ollama (LLaMA3)]
+    C --> E[Memory System]
 ```
 
 ---
@@ -133,13 +124,15 @@ flowchart LR
 
 ### Endpoint
 
+```http
 POST /analyze
+```
 
 ### Request
 
 ```json
 {
-  "log": "jenkins error log here"
+  "log": "your jenkins log here"
 }
 ```
 
@@ -147,46 +140,60 @@ POST /analyze
 
 ```json
 {
-  "rule_based": {...},
-  "memory": {...},
-  "ai_analysis": {...},
-  "fix": {...},
-  "accuracy": 92
+  "ai_analysis": {
+    "error_type": "...",
+    "root_cause": "...",
+    "fix": "..."
+  },
+  "fix": {
+    "issue": "...",
+    "fix": "..."
+  },
+  "accuracy": 90
 }
 ```
 
 ---
 
-## 📂 Project Structure
+## 🐳 Dockerized Setup (1-Command Run)
 
-```
-Hack2Hire/
- ├── app.py
- ├── api.py
- ├── final_analyzer.py
- ├── memory.json
- ├── logs.txt
- ├── requirements.txt
- ├── Dockerfile
- ├── docker-compose.yml
- ├── README.md
+### ✅ Run Full System
+
+```bash
+docker-compose up --build
 ```
 
 ---
 
-## 🚀 Run the System
+### 🧠 Pull AI Model (First Time Only)
 
-### Docker (Recommended)
-
-```
-docker-compose up --build
+```bash
+docker exec -it ollama ollama pull llama3
 ```
 
-### Manual Run
+---
+
+### 🌐 Access
+
+* UI → http://localhost:8501
+* API → http://localhost:8000
+* AI → http://localhost:11434
+
+---
+
+## 📂 Project Structure (Evolving System)
 
 ```
-python -m uvicorn api:app --reload
-python -m streamlit run app.py
+Hack2Hire/
+ ├── app.py                  # Streamlit UI
+ ├── api.py                  # FastAPI backend
+ ├── final_analyzer.py       # AI engine
+ ├── docker-compose.yml      # Multi-container setup
+ ├── Dockerfile              # Backend container
+ ├── Dockerfile.streamlit    # Frontend container
+ ├── memory.json             # Learned knowledge
+ ├── requirements.txt        # Dependencies
+ ├── README.md               # Documentation
 ```
 
 ---
@@ -203,58 +210,60 @@ fatal: Authentication failed
 ### Output
 
 ```
-Error Type: Git/Auth Failure
-Root Cause: Invalid credentials
-
+Error Type: Git Auth Failure
+Root Cause: Invalid credentials or missing access token
 Fix:
-1. Use personal access token
-2. Update git URL
-3. Verify repository permissions
-
-Accuracy: ~90%
+1. Add Git credentials
+2. Use personal access token
+3. Update repository URL
 ```
 
 ---
 
-## 🚀 What’s New (Today’s Upgrade 🚀)
+## 📊 Learning & Accuracy
 
-* Real accuracy scoring (no manual input)
-* Self-learning fix engine (success tracking)
-* Improved hybrid AI logic
-* Detailed step-by-step fixes
-* API upgraded with accuracy + memory
-* Enhanced UI explanations
+| Feature            | Behavior                    |
+| ------------------ | --------------------------- |
+| Accuracy           | Dynamic (AI + memory based) |
+| Learning           | Automatic                   |
+| Adaptability       | High                        |
+| Pattern Dependency | ❌ None                      |
 
 ---
 
 ## 🔮 Future Evolution
 
-* Jenkins webhook automation
-* Semantic AI (no pattern dependency)
-* Vector database memory
-* Cloud deployment
+* 🔗 Jenkins webhook integration
+* 🤖 Auto-fix execution (self-healing pipelines)
+* ☁️ Cloud deployment (AWS / Render)
+* 📊 Advanced analytics dashboard
+* 🔁 Continuous AI improvement loop
 
 ---
 
 ## 🎯 Why This Project Stands Out
 
-✔ Self-learning system
-✔ Real accuracy scoring
-✔ Hybrid AI + Rule + Memory
+✔ Fully AI-driven (not rule-based)
 ✔ Microservice architecture
-✔ Production-ready
+✔ Dockerized production setup
+✔ Self-learning system
+✔ Real-time DevOps use-case
+✔ Handles unknown failures
 
 ---
 
 ## 👨‍💻 Team
 
-Team 404 ERROR
-Gagan M
-Abhisek M
+**Team 404 ERROR**
+
+* Gagan M
+* Abhisek M
 
 ---
 
 ## 📌 Final Thought
 
-AutoFix CI is not just a tool —
-it’s a **self-improving DevOps intelligence system** 🚀
+AutoFix CI is not just a project —
+it’s a step toward **autonomous DevOps systems** 🚀
+
+---
