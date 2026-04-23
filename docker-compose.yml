@@ -1,27 +1,37 @@
 version: "3.9"
 
 services:
-
   backend:
-    build: .
+    build:
+      context: ./backend
     container_name: autofix_backend
     ports:
       - "8000:8000"
-    depends_on:
-      - ollama
+    volumes:
+      - ./memory.json:/app/memory.json   # ✅ INSIDE backend
+    networks:
+      - autofix_net
 
   frontend:
     build:
-      context: .
+      context: ./frontend
       dockerfile: Dockerfile.streamlit
     container_name: autofix_frontend
     ports:
       - "8501:8501"
     depends_on:
       - backend
+    networks:
+      - autofix_net
 
   ollama:
     image: ollama/ollama
     container_name: ollama
     ports:
       - "11434:11434"
+    networks:
+      - autofix_net
+
+networks:
+  autofix_net:
+    driver: bridge

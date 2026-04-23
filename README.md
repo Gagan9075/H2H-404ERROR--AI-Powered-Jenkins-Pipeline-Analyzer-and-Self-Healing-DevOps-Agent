@@ -1,128 +1,141 @@
 # 🚀 AutoFix CI — Self-Healing DevOps AI
 
-### ⚡ Intelligent, AI-Powered CI/CD Failure Analyzer
+### ⚡ AI-Powered Jenkins Pipeline Analyzer & Autonomous DevOps Agent
 
-> From rule-based debugging → to a **fully AI-driven, self-learning DevOps system**
+> Turning CI/CD failures into **automated, intelligent recovery systems**
 
 ---
 
-## 📑 Table of Contents
+# 📑 Table of Contents
 
-* [🔥 Live System Status](#-live-system-status)
-* [🧠 What Makes This Dynamic](#-what-makes-this-dynamic)
-* [⚙️ Dynamic Workflow](#️-dynamic-workflow)
-* [🌟 Key Capabilities](#-key-capabilities-live-behavior)
-* [🏗️ System Architecture](#️-system-architecture-production-ready)
-* [📡 API Design](#-api-driven-design)
-* [🐳 Dockerized Setup](#-dockerized-setup-one-command-run)
-* [📂 Project Structure](#-project-structure-evolving-system)
-* [🧪 Dynamic Example](#-dynamic-example)
-* [📊 Learning & Accuracy](#-learning--accuracy)
-* [🔮 Future Scope](#-future-evolution)
+* [🔥 Overview](#-overview)
+* [🧠 Key Innovation](#-key-innovation)
+* [⚙️ Workflow](#️-workflow)
+* [🌟 Features](#-features)
+* [🏗️ Architecture](#️-architecture)
+* [📡 API Design](#-api-design)
+* [🐳 Setup & Deployment](#-setup--deployment)
+* [📂 Project Structure](#-project-structure)
+* [🧪 Example](#-example)
+* [📊 Learning System](#-learning-system)
+* [🔮 Future Scope](#-future-scope)
 * [🎯 Why This Project Stands Out](#-why-this-project-stands-out)
 * [👨‍💻 Team](#-team)
 * [📌 Final Thought](#-final-thought)
 
 ---
 
-## 🔥 Live System Status
+# 🔥 Overview
 
-* 🟢 Backend: FastAPI (Microservice)
-* 🟢 Frontend: Streamlit (UI Layer)
-* 🟢 AI Engine: LLaMA3 via Ollama
-* 🟢 Deployment: Dockerized (multi-container)
-* 🧠 Memory: Self-learning enabled
-* 📊 Accuracy: Dynamically computed
+AutoFix CI is an **AI-driven DevOps system** that:
 
----
-
-## 🧠 What Makes This Dynamic
-
-AutoFix CI is **NOT a static tool**:
-
-* Learns from failures (`memory.json`)
-* Uses **AI-first analysis (no fixed patterns)**
-* Improves fixes based on success rate
-* Works for **unknown/unseen logs**
-* Runs as **real microservice architecture**
-* Handles failures in real-time pipelines
+* 🔍 Analyzes CI/CD logs automatically
+* 🧠 Identifies root causes using LLMs
+* 🛠 Generates step-by-step fixes
+* ⚡ Executes safe self-healing actions
+* 📊 Learns from past failures
 
 ---
 
-## ⚙️ Dynamic Workflow
+# 🧠 Key Innovation
+
+Unlike traditional tools:
+
+✔ No rule-based debugging
+✔ Works on unseen logs
+✔ AI-first reasoning
+✔ Self-learning memory system
+✔ Fully containerized architecture
+
+---
+
+# ⚙️ Workflow
 
 ```mermaid
 flowchart LR
-    A[User Log] --> B[Streamlit UI]
+    A[CI/CD Logs] --> B[Streamlit UI]
     B --> C[FastAPI Backend]
-    C --> D[AI Engine (LLaMA3)]
-    D --> E[Structured Output]
-    E --> F[Fix Generator]
-    F --> G[Response to UI]
-    G --> H[Memory Update]
+    C --> D[AI Analyzer]
+    D --> E[Ollama LLM]
+    E --> F[Structured Response]
+    F --> G[Fix Generator]
+    G --> H[Execution Engine]
+    H --> I[Self-Healing]
+    I --> J[Memory Update]
 ```
 
 ---
 
-## 🌟 Key Capabilities (Live Behavior)
+# 🌟 Features
 
-### 🤖 Fully AI-Driven Analysis
+## 🤖 AI Log Analysis
 
-* No dependency on hardcoded patterns
-* Understands ANY CI/CD log
-* Extracts real root cause
+* Detects failure patterns automatically
+* Extracts:
 
-### 🧠 Self-Learning Memory
-
-* Stores past failures
-* Tracks success rate
-* Improves fixes automatically
-
-### 🛠 Smart Fix Engine
-
-* Generates step-by-step solutions
-* Context-aware recommendations
-
-### 📊 Real Accuracy Scoring
-
-* Confidence based on:
-
-  * AI certainty
-  * historical success
-* Not manually entered
-
-### 🔁 Pipeline Simulation
-
-* Shows:
-
-  * Before fix ❌
-  * After fix ✅
-
-### 📊 Learning Dashboard
-
-* Tracks:
-
-  * failure frequency
-  * most common issues
-  * system learning growth
+  * Error type
+  * Root cause
+  * Fix plan
 
 ---
 
-## 🏗️ System Architecture (Production Ready)
+## 🛠 Intelligent Fix Engine
+
+* Generates multi-step solutions
+* Context-aware recommendations
+* Works on unknown logs
+
+---
+
+## ⚡ Self-Healing Execution
+
+* Executes safe commands
+* Verifies fixes automatically
+* Prevents unsafe operations
+
+---
+
+## 📊 Learning Dashboard
+
+* Tracks failures dynamically
+* Displays frequency trends
+* Improves system intelligence
+
+---
+
+## 📈 Dynamic Accuracy Score
+
+* Based on:
+
+  * AI confidence
+  * Past success rate
+
+---
+
+# 🏗️ Architecture
 
 ```mermaid
-flowchart LR
-    A[Streamlit UI] --> B[FastAPI Backend]
-    B --> C[AI Analyzer]
-    C --> D[Ollama (LLaMA3)]
-    C --> E[Memory System]
+flowchart TB
+    UI[Streamlit Frontend]
+    API[FastAPI Backend]
+    AI[AI Analyzer Engine]
+    LLM[Ollama LLM]
+    EXEC[Execution Engine]
+    MEM[Memory System]
+
+    UI --> API
+    API --> AI
+    AI --> LLM
+    AI --> EXEC
+    EXEC --> MEM
+    API --> UI
 ```
 
 ---
 
-## 📡 API-Driven Design
+# 📡 API Design
 
-### Endpoint
+## 🔹 Analyze Pipeline Logs
 
 ```http
 POST /analyze
@@ -132,7 +145,7 @@ POST /analyze
 
 ```json
 {
-  "log": "your jenkins log here"
+  "log": "Jenkins pipeline log"
 }
 ```
 
@@ -141,23 +154,31 @@ POST /analyze
 ```json
 {
   "ai_analysis": {
-    "error_type": "...",
-    "root_cause": "...",
-    "fix": "..."
+    "error_type": "Build Timeout",
+    "root_cause": "Long-running task",
+    "fix": "Increase timeout"
   },
-  "fix": {
-    "issue": "...",
-    "fix": "..."
+  "exec_fix": {
+    "type": "auto",
+    "commands": ["increase timeout"]
   },
-  "accuracy": 90
+  "accuracy": 85
 }
 ```
 
 ---
 
-## 🐳 Dockerized Setup (1-Command Run)
+## 🔹 Get Learning Data
 
-### ✅ Run Full System
+```http
+GET /memory
+```
+
+---
+
+# 🐳 Setup & Deployment
+
+## 🚀 Run Full System
 
 ```bash
 docker-compose up --build
@@ -165,7 +186,7 @@ docker-compose up --build
 
 ---
 
-### 🧠 Pull AI Model (First Time Only)
+## 🧠 Pull AI Model (First Time)
 
 ```bash
 docker exec -it ollama ollama pull llama3
@@ -173,86 +194,111 @@ docker exec -it ollama ollama pull llama3
 
 ---
 
-### 🌐 Access
+## 🌐 Access
 
-* UI → http://localhost:8501
-* API → http://localhost:8000
-* AI → http://localhost:11434
+| Service   | URL                    |
+| --------- | ---------------------- |
+| UI        | http://localhost:8501  |
+| Backend   | http://localhost:8000  |
+| AI Engine | http://localhost:11434 |
 
 ---
 
-## 📂 Project Structure (Evolving System)
+# 📂 Project Structure
 
 ```
 Hack2Hire/
- ├── app.py                  # Streamlit UI
- ├── api.py                  # FastAPI backend
- ├── final_analyzer.py       # AI engine
- ├── docker-compose.yml      # Multi-container setup
- ├── Dockerfile              # Backend container
- ├── Dockerfile.streamlit    # Frontend container
- ├── memory.json             # Learned knowledge
- ├── requirements.txt        # Dependencies
- ├── README.md               # Documentation
+│
+├── backend/
+│   ├── api.py
+│   ├── final_analyzer.py
+│   ├── executor.py
+│   ├── Dockerfile
+│   ├── requirements.txt
+│
+├── frontend/
+│   ├── app.py
+│   ├── Dockerfile.streamlit
+│   ├── requirements.txt
+│
+├── docker-compose.yml
+├── memory.json
+├── safety.py
+├── README.md
 ```
 
 ---
 
-## 🧪 Dynamic Example
+# 🧪 Example
 
-### Input
+### Input Log
 
 ```
 ERROR: Repository not found
 fatal: Authentication failed
 ```
 
-### Output
+---
 
-```
-Error Type: Git Auth Failure
-Root Cause: Invalid credentials or missing access token
-Fix:
-1. Add Git credentials
-2. Use personal access token
-3. Update repository URL
+### AI Output
+
+* Error Type: Git Authentication Failure
+* Root Cause: Invalid credentials
+* Fix Plan:
+
+  1. Verify credentials
+  2. Use access token
+  3. Retry pipeline
+
+---
+
+# 📊 Learning System
+
+```mermaid
+flowchart LR
+    A[New Failure] --> B[Store in Memory]
+    B --> C[Increase Count]
+    C --> D[Improve Future Fix]
 ```
 
 ---
 
-## 📊 Learning & Accuracy
+## Sample Memory
 
-| Feature            | Behavior                    |
-| ------------------ | --------------------------- |
-| Accuracy           | Dynamic (AI + memory based) |
-| Learning           | Automatic                   |
-| Adaptability       | High                        |
-| Pattern Dependency | ❌ None                      |
+```json
+{
+  "failures": [
+    {
+      "error": "build timeout",
+      "count": 3
+    }
+  ]
+}
+```
 
 ---
 
-## 🔮 Future Evolution
+# 🔮 Future Scope
 
-* 🔗 Jenkins webhook integration
-* 🤖 Auto-fix execution (self-healing pipelines)
-* ☁️ Cloud deployment (AWS / Render)
+* 🔗 Jenkins integration
+* 🤖 Fully autonomous pipelines
+* ☁️ Cloud deployment
 * 📊 Advanced analytics dashboard
-* 🔁 Continuous AI improvement loop
+* 🔁 Continuous learning loop
 
 ---
 
-## 🎯 Why This Project Stands Out
+# 🎯 Why This Project Stands Out
 
-✔ Fully AI-driven (not rule-based)
+✔ Fully AI-driven
+✔ Self-healing capability
+✔ Real-world DevOps application
 ✔ Microservice architecture
-✔ Dockerized production setup
-✔ Self-learning system
-✔ Real-time DevOps use-case
-✔ Handles unknown failures
+✔ Dynamic learning system
 
 ---
 
-## 👨‍💻 Team
+# 👨‍💻 Team
 
 **Team 404 ERROR**
 
@@ -261,9 +307,7 @@ Fix:
 
 ---
 
-## 📌 Final Thought
+# 📌 Final Thought
 
-AutoFix CI is not just a project —
+AutoFix CI is not just a tool —
 it’s a step toward **autonomous DevOps systems** 🚀
-
----
