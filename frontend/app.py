@@ -5,8 +5,13 @@ import os
 import pandas as pd
 
 # ---------------- CONFIG ----------------
-API_URL = "http://backend:8000/analyze"
-AUTO_HEAL_URL = "http://backend:8000/auto-heal"
+#API_URL = "http://backend:8000/analyze"
+#AUTO_HEAL_URL = "https://h2h-404error-ai-powered-jenkins-pipeline-analyz-production.up.railway.app/analyze"
+#AUTO_HEAL_URL = "http://backend:8000/auto-heal"
+
+# ---------------- CONFIG ----------------
+API_URL = "https://h2h-404error-ai-powered-jenkins-pipeline-analyz-production.up.railway.app/analyze"
+MEMORY_URL = "https://h2h-404error-ai-powered-jenkins-pipeline-analyz-production.up.railway.app/memory"
 
 st.set_page_config(page_title="AutoFix CI", layout="wide")
 
@@ -172,7 +177,7 @@ if st.session_state.data:
     st.subheader("📊 Learning Dashboard")
 
     try:
-        res = requests.get("http://backend:8000/memory")
+        res = requests.get(MEMORY_URL, timeout=10)
         data = res.json()
 
         failures = data.get("failures", [])

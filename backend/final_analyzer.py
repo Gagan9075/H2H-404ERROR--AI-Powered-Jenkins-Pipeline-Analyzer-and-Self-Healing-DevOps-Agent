@@ -78,16 +78,12 @@ Analyze CI/CD logs and return ONLY valid JSON.
 STRICT RULES:
 - ONLY JSON output
 - NO markdown
-- NO bullet points
 - NO explanation outside JSON
-- USE double quotes
-- Fix must contain REAL actionable steps
 
 Log:
 {cleaned_log}
 
 Return EXACT format:
-
 {{
   "error_type": "short error",
   "root_cause": "technical explanation",
@@ -96,57 +92,75 @@ Return EXACT format:
 }}
 """
 
-    for attempt in range(3):
-        try:
-            response = requests.post(
-                "http://ollama:11434/api/generate",
-                json={
-                    "model": "llama3",
-                    "prompt": prompt,
-                    "stream": False
-                },
-                timeout=120
-            )
+    try:
+        response = requests.post(
+            "http://ollama:11434/api/generate",
+            json={
+                "model": "llama3",
+                "prompt": prompt,
+                "stream": False
+            },
+            timeout=60
+        )
 
-            res = response.json()
-            raw = res.get("response", "")
+        res = response.json()
+        raw = res.get("response", "").strip()
 
-            print("🧠 RAW:", raw)
+        # CLEAN RESPONSE
+        raw = raw.replace("```json", "").replace("```", "")
 
-            if not raw:
-                raise Exception("Empty AI response")
+        match = re.search(r"\{.*\}", raw, re.DOTALL)
+        if match:
+            parsed = json.loads(match.group())
 
-            # CLEAN
-            raw = raw.strip()
-            raw = raw.replace("```json", "").replace("```", "")
+            if parsed.get("fix"):
+                return parsed
 
-            # EXTRACT JSON
-            match = re.search(r"\{.*\}", raw, re.DOTALL)
-            if match:
-                raw = match.group()
+    except Exception as e:
+        print("❌ AI failed, switching to fallback:", e)
 
-            parsed = json.loads(raw)
+    # ---------------- FALLBACK LOGIC ----------------
+    log = log_text.lower()
 
-            # VALIDATE FIX
-            fix = parsed.get("fix", "")
+    if "timeout" in log:
+        return {
+            "error_type": "Build Timeout",
+            "root_cause": "Build exceeded allowed execution time",
+            "fix": "Increase timeout in Jenkins\\nOptimize build steps\\nCheck heavy processes",
+            "commands": ["timeout 30m", "optimize build"]
+        }
 
-            if not fix or "step 1" in fix.lower():
-                print("⚠️ Bad AI output, retrying...")
-                time.sleep(2)
-                continue
+    elif "auth" in log or "permission" in log:
+        return {
+            "error_type": "Authentication Failure",
+            "root_cause": "Invalid credentials or access denied",
+            "fix": "Update credentials\\nUse access token\\nVerify permissions",
+            "commands": ["git config", "update token"]
+        }
 
-            return parsed
+    elif "not found" in log:
+        return {
+            "error_type": "Resource Not Found",
+            "root_cause": "Incorrect file path or missing resource",
+            "fix": "Check file paths\\nVerify repository URL\\nEnsure resource exists",
+            "commands": ["ls", "check path"]
+        }
 
-        except Exception as e:
-            print(f"❌ Attempt {attempt+1} failed:", e)
-            time.sleep(2)
+    elif "docker" in log:
+        return {
+            "error_type": "Docker Failure",
+            "root_cause": "Container build or runtime issue",
+            "fix": "Rebuild image\\nCheck Dockerfile\\nVerify dependencies",
+            "commands": ["docker build", "docker logs"]
+        }
 
-    return {
-        "error_type": "AI Failure",
-        "root_cause": "AI failed to generate valid response",
-        "fix": "Check logs manually\\nVerify service\\nRetry pipeline",
-        "commands": []
-    }
+    else:
+        return {
+            "error_type": "Unknown Error",
+            "root_cause": "Unrecognized failure pattern",
+            "fix": "Check logs manually\\nRestart pipeline\\nDebug step-by-step",
+            "commands": []
+        }
 
 
 # ---------------- PARSER ----------------
