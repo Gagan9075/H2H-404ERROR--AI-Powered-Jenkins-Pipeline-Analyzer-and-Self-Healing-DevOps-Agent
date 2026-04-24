@@ -10,6 +10,7 @@ import pandas as pd
 #AUTO_HEAL_URL = "http://backend:8000/auto-heal"
 
 # ---------------- CONFIG ----------------
+
 API_URL = "https://h2h-404error-ai-powered-jenkins-pipeline-analyz-production.up.railway.app/analyze"
 MEMORY_URL = "https://h2h-404error-ai-powered-jenkins-pipeline-analyz-production.up.railway.app/memory"
 
@@ -26,29 +27,48 @@ if "data" not in st.session_state:
     st.session_state.data = None
 
 # ---------------- ANALYZE ----------------
-if st.button("🔍 Analyze Pipeline"):
+import requests
 
-    if not log_input.strip():
-        st.warning("Please enter a Jenkins log!")
-        st.stop()
-
-    with st.spinner("🤖 AI analyzing your pipeline... please wait..."):
+if st.button("Analyze Pipeline"):
+    if user_input.strip() == "":
+        st.warning("Please enter a log")
+    else:
         try:
-            response = requests.post(API_URL, json={"log": log_input}, timeout=180)
+            response = requests.post(
+                API_URL,
+                json={"log": user_input}
+            )
+
             data = response.json()
 
-            # Handle string JSON
-            if isinstance(data, str):
-                data = json.loads(data)
+            # Extract backend response
+            ai = data.get("ai_analysis", {})
+            accuracy = data.get("accuracy", 0)
 
-            print("FINAL RESPONSE:", data)
+            error_type = ai.get("error_type", "Unknown")
+            root_cause = ai.get("root_cause", "Unknown")
+            fix_steps = ai.get("fix", "")
+            commands = ai.get("commands", [])
 
-            st.session_state.data = data
+            # Display results
+            st.subheader("🚨 Incident Summary")
+            st.write(f"Error Type: {error_type}")
+            st.write(f"AI Confidence: {accuracy}%")
+            st.write("Pipeline Status: Failed ❌")
+
+            st.subheader("🧠 Root Cause")
+            st.write(root_cause)
+
+            st.subheader("🛠 Fix Plan")
+            st.write(fix_steps)
+
+            if commands:
+                st.subheader("⚙️ Suggested Commands")
+                for cmd in commands:
+                    st.code(cmd)
 
         except Exception as e:
-            st.error(f"🚨 API Error: {e}")
-            st.stop()
-
+            st.error(f"Error connecting to backend: {e}")
 # ---------------- DISPLAY ----------------
 if st.session_state.data:
 
