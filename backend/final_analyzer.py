@@ -120,48 +120,57 @@ Return EXACT format:
         print("❌ AI failed, switching to fallback:", e)
 
     # ---------------- FALLBACK LOGIC ----------------
-    log = log_text.lower()
+    # ---------------- FALLBACK LOGIC ----------------
+log = log_text.lower()
 
-    if "timeout" in log:
-        return {
-            "error_type": "Build Timeout",
-            "root_cause": "Build exceeded allowed execution time",
-            "fix": "Increase timeout in Jenkins\\nOptimize build steps\\nCheck heavy processes",
-            "commands": ["timeout 30m", "optimize build"]
-        }
+# 🔥 SMART MATCHING (VERY IMPORTANT)
+if any(k in log for k in ["timeout", "timed out", "build timeout", "execution time exceeded"]):
+    return {
+        "error_type": "Build Timeout",
+        "root_cause": "Build exceeded allowed execution time",
+        "fix": "Increase timeout in Jenkins\\nOptimize build steps\\nCheck heavy processes",
+        "commands": ["timeout 30m", "optimize build"]
+    }
 
-    elif "auth" in log or "permission" in log:
-        return {
-            "error_type": "Authentication Failure",
-            "root_cause": "Invalid credentials or access denied",
-            "fix": "Update credentials\\nUse access token\\nVerify permissions",
-            "commands": ["git config", "update token"]
-        }
+elif any(k in log for k in ["auth", "permission denied", "access denied", "unauthorized"]):
+    return {
+        "error_type": "Authentication Failure",
+        "root_cause": "Invalid credentials or insufficient permissions",
+        "fix": "Update credentials\\nUse access token\\nVerify permissions",
+        "commands": ["git config", "update token"]
+    }
 
-    elif "not found" in log:
-        return {
-            "error_type": "Resource Not Found",
-            "root_cause": "Incorrect file path or missing resource",
-            "fix": "Check file paths\\nVerify repository URL\\nEnsure resource exists",
-            "commands": ["ls", "check path"]
-        }
+elif any(k in log for k in ["not found", "no such file", "missing file"]):
+    return {
+        "error_type": "Resource Not Found",
+        "root_cause": "Incorrect file path or missing resource",
+        "fix": "Check file paths\\nVerify repository URL\\nEnsure resource exists",
+        "commands": ["ls", "check path"]
+    }
 
-    elif "docker" in log:
-        return {
-            "error_type": "Docker Failure",
-            "root_cause": "Container build or runtime issue",
-            "fix": "Rebuild image\\nCheck Dockerfile\\nVerify dependencies",
-            "commands": ["docker build", "docker logs"]
-        }
+elif any(k in log for k in ["docker", "container", "image build failed"]):
+    return {
+        "error_type": "Docker Failure",
+        "root_cause": "Container build or runtime issue",
+        "fix": "Rebuild image\\nCheck Dockerfile\\nVerify dependencies",
+        "commands": ["docker build", "docker logs"]
+    }
 
-    else:
-        return {
-            "error_type": "Unknown Error",
-            "root_cause": "Unrecognized failure pattern",
-            "fix": "Check logs manually\\nRestart pipeline\\nDebug step-by-step",
-            "commands": []
-        }
+elif any(k in log for k in ["nullpointerexception", "segmentation fault", "runtime error"]):
+    return {
+        "error_type": "Application Crash",
+        "root_cause": "Application runtime failure",
+        "fix": "Check stack trace\\nDebug code\\nFix null references",
+        "commands": []
+    }
 
+else:
+    return {
+        "error_type": "Unknown Error",
+        "root_cause": "Unrecognized failure pattern",
+        "fix": "Check logs manually\\nRestart pipeline\\nDebug step-by-step",
+        "commands": []
+    }
 
 # ---------------- PARSER ----------------
 
