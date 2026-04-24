@@ -53,10 +53,11 @@ def extract_important_lines(log):
     lines = log.split("\n")
 
     keywords = [
-        "error", "failed", "exception",
-        "fatal", "denied", "not found",
-        "authentication", "timeout"
-    ]
+    "error", "failed", "failure", "exception",
+    "fatal", "denied", "not found",
+    "authentication", "timeout", "timed out",
+    "aborted", "killed", "crash"
+]
 
     important = [
         l for l in lines if any(k in l.lower() for k in keywords)
@@ -106,7 +107,6 @@ Return EXACT format:
         res = response.json()
         raw = res.get("response", "").strip()
 
-        # CLEAN RESPONSE
         raw = raw.replace("```json", "").replace("```", "")
 
         match = re.search(r"\{.*\}", raw, re.DOTALL)
@@ -119,59 +119,74 @@ Return EXACT format:
     except Exception as e:
         print("❌ AI failed, switching to fallback:", e)
 
-    # ---------------- FALLBACK LOGIC ----------------
-    # ---------------- FALLBACK LOGIC ----------------
-log = log_text.lower()
+    # =========================
+    # 🔥 FIXED FALLBACK (INSIDE FUNCTION)
+    # =========================
+    log = log_text.lower()
 
-# 🔥 SMART MATCHING (VERY IMPORTANT)
-if any(k in log for k in ["timeout", "timed out", "build timeout", "execution time exceeded"]):
-    return {
-        "error_type": "Build Timeout",
-        "root_cause": "Build exceeded allowed execution time",
-        "fix": "Increase timeout in Jenkins\\nOptimize build steps\\nCheck heavy processes",
-        "commands": ["timeout 30m", "optimize build"]
-    }
+    # ⏱ TIMEOUT
+    if any(k in log for k in ["timeout", "timed out", "build timeout", "execution time exceeded"]):
+        return {
+            "error_type": "Build Timeout",
+            "root_cause": "Build exceeded allowed execution time",
+            "fix": "Increase timeout in Jenkins\nOptimize build steps\nCheck heavy processes",
+            "commands": ["timeout 30m", "optimize build"]
+        }
 
-elif any(k in log for k in ["auth", "permission denied", "access denied", "unauthorized"]):
-    return {
-        "error_type": "Authentication Failure",
-        "root_cause": "Invalid credentials or insufficient permissions",
-        "fix": "Update credentials\\nUse access token\\nVerify permissions",
-        "commands": ["git config", "update token"]
-    }
+    # 🔐 AUTH
+    elif any(k in log for k in ["auth", "permission denied", "access denied", "unauthorized"]):
+        return {
+            "error_type": "Authentication Failure",
+            "root_cause": "Invalid credentials or insufficient permissions",
+            "fix": "Update credentials\nUse access token\nVerify permissions",
+            "commands": ["git config", "update token"]
+        }
 
-elif any(k in log for k in ["not found", "no such file", "missing file"]):
-    return {
-        "error_type": "Resource Not Found",
-        "root_cause": "Incorrect file path or missing resource",
-        "fix": "Check file paths\\nVerify repository URL\\nEnsure resource exists",
-        "commands": ["ls", "check path"]
-    }
+    # 📁 NOT FOUND
+    elif any(k in log for k in ["not found", "no such file", "missing file"]):
+        return {
+            "error_type": "Resource Not Found",
+            "root_cause": "Incorrect file path or missing resource",
+            "fix": "Check file paths\nVerify repository URL\nEnsure resource exists",
+            "commands": ["ls", "check path"]
+        }
 
-elif any(k in log for k in ["docker", "container", "image build failed"]):
-    return {
-        "error_type": "Docker Failure",
-        "root_cause": "Container build or runtime issue",
-        "fix": "Rebuild image\\nCheck Dockerfile\\nVerify dependencies",
-        "commands": ["docker build", "docker logs"]
-    }
+    # 🐳 DOCKER
+    elif any(k in log for k in ["docker", "container", "image build failed"]):
+        return {
+            "error_type": "Docker Failure",
+            "root_cause": "Container build or runtime issue",
+            "fix": "Rebuild image\nCheck Dockerfile\nVerify dependencies",
+            "commands": ["docker build", "docker logs"]
+        }
 
-elif any(k in log for k in ["nullpointerexception", "segmentation fault", "runtime error"]):
-    return {
-        "error_type": "Application Crash",
-        "root_cause": "Application runtime failure",
-        "fix": "Check stack trace\\nDebug code\\nFix null references",
-        "commands": []
-    }
+    # 💥 CRASH
+    elif any(k in log for k in ["nullpointerexception", "segmentation fault", "runtime error"]):
+        return {
+            "error_type": "Application Crash",
+            "root_cause": "Application runtime failure",
+            "fix": "Check stack trace\nDebug code\nFix null references",
+            "commands": []
+        }
 
-else:
-    return {
-        "error_type": "Unknown Error",
-        "root_cause": "Unrecognized failure pattern",
-        "fix": "Check logs manually\\nRestart pipeline\\nDebug step-by-step",
-        "commands": []
-    }
+    # ❗ GENERIC ERROR
+    elif "error" in log or "failed" in log:
+        return {
+            "error_type": "General Failure",
+            "root_cause": "Pipeline execution failed",
+            "fix": "Check logs manually\nFix issue\nRetry pipeline",
+            "commands": []
+        }
 
+    # ⚠️ LAST FALLBACK
+    else:
+        return {
+            "error_type": "Unknown Error",
+            "root_cause": "Unrecognized failure pattern",
+            "fix": "Check logs manually\nRestart pipeline\nDebug step-by-step",
+            "commands": []
+        }
+  
 # ---------------- PARSER ----------------
 
 def parse_ai_response(ai_raw):
